@@ -155,6 +155,6 @@ Set the Supabase URL and public key at the top of the script in `index.html`. Th
 
 ## Team
 
-Built by [rafaelsava](https://github.com/rafaelsava), [santiagoguti17](https://github.com/santiagoguti17), [FerminEscalona](https://github.com/FerminEscalona) and [10santiago12](https://github.com/10santiago12), one repository each. <!-- Add full names here, as in last year's README. -->
+[Santiago Gutiérrez](https://github.com/santiagoguti17), [Fermín Escalona](https://github.com/FerminEscalona), [Santiago Urrego](https://github.com/10santiago12), [Rafael Salcedo](https://github.com/rafaelsava) and [Adriana Galbán](https://github.com/ananabananag).
 
 See [`N Club.md`](N%20Club.md) for the challenge brief and evaluation criteria.

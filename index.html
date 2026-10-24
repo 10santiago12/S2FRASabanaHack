@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>N Club</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --ink: #111827;
+      --muted: #6b7280;
+      --line: #e8eaee;
+      --soft: #f6f7f9;
+      --ok: #16a34a;
+      --err: #dc2626;
+      --radius: 20px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      padding: max(28px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+      background: #fff;
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    main {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .brand {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+    }
+
+    .screen { animation: rise 0.5s var(--ease) both; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    h1 { margin: 0 0 6px; font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
+    .sub { margin: 0 0 28px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+
+    /* Form */
+    .field { display: block; margin-bottom: 14px; }
+    .field span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
+    input {
+      width: 100%;
+      height: 52px;
+      padding: 0 16px;
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      background: var(--soft);
+      color: var(--ink);
+      font: inherit;
+      font-size: 16px; /* avoids iOS zoom on focus */
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--ink);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.06);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      height: 54px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s var(--ease), opacity 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 20px rgba(17, 24, 39, 0.18);
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; box-shadow: none; cursor: default; }
+    .btn.ghost { background: transparent; color: var(--muted); box-shadow: none; font-weight: 500; }
+
+    /* Profile */
+    .card {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
+    }
+    .who { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .avatar {
+      width: 56px; height: 56px; flex: none;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: var(--ink); color: #fff;
+      font-size: 20px; font-weight: 600;
+    }
+    .name { font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
+    .chip {
+      display: inline-block; margin-top: 6px; padding: 4px 12px;
+      border-radius: 999px; background: var(--soft);
+      font-size: 13px; font-weight: 500;
+    }
+    .row {
+      display: flex; justify-content: space-between; gap: 16px;
+      padding: 14px 0; border-top: 1px solid var(--line); font-size: 15px;
+    }
+    .row span:first-child { color: var(--muted); }
+    .row span:last-child { font-weight: 500; text-align: right; }
+    .ok { color: var(--ok); }
+
+    /* Capture */
+    #capture { margin-top: 24px; text-align: center; }
+    .steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+    .step {
+      width: 8px; height: 8px; border-radius: 999px; background: var(--line);
+      transition: width 0.4s var(--ease), background 0.3s;
+    }
+    .step.active { width: 28px; background: var(--ink); }
+    .step.done { background: var(--ok); }
+
+    .oval {
+      position: relative;
+      width: min(68vw, 270px);
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 22px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--soft);
+      box-shadow: 0 0 0 5px #fff, 0 0 0 7px var(--ink), 0 18px 40px rgba(17, 24, 39, 0.12);
+      transition: box-shadow 0.3s var(--ease);
+    }
+    .oval.flash { box-shadow: 0 0 0 5px #fff, 0 0 0 7px var(--ok), 0 0 0 16px rgba(22, 163, 74, 0.15); }
+    .oval video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+
+    #capture-instruction { margin: 0 0 4px; font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
+    .hint { margin: 0 0 22px; color: var(--muted); font-size: 14px; }
+
+    #error { min-height: 20px; margin: 0; text-align: center; color: var(--err); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand">N Club</div>
+
+    <form id="login-form" class="screen">
+      <h1>Bienvenido</h1>
+      <p class="sub">Ingresa con tu documento para continuar.</p>
+      <label class="field"><span>Documento</span><input id="document" inputmode="numeric" autocomplete="username" required></label>
+      <label class="field"><span>Contraseña</span><input id="password" type="password" autocomplete="current-password" required></label>
+      <button class="btn" type="submit" style="margin-top: 10px">Ingresar</button>
+    </form>
+
+    <section id="profile" class="screen" hidden>
+      <div class="card">
+        <div class="who">
+          <div class="avatar" id="initials"></div>
+          <div>
+            <div class="name"><span id="first-name"></span> <span id="last-name"></span></div>
+            <span class="chip" id="category"></span>
+          </div>
+        </div>
+        <div class="row"><span>Destino</span><span id="destination"></span></div>
+        <div class="row"><span>Fotos registradas</span><span id="photo-status"><span id="photo-count"></span> de 3</span></div>
+      </div>
+
+      <div id="capture" hidden>
+        <div class="steps" id="steps"><i class="step"></i><i class="step"></i><i class="step"></i></div>
+        <div class="oval" id="oval">
+          <video id="video" autoplay playsinline muted></video>        </div>
+        <canvas id="canvas" hidden></canvas>
+        <p id="capture-instruction"></p>
+        <p class="hint">Centra tu rostro dentro del óvalo.</p>
+        <button class="btn" id="shoot" type="button">Tomar foto</button>
+      </div>
+
+      <button class="btn ghost" id="logout" type="button" style="margin-top: 16px">Salir</button>
+    </section>
+
+    <p id="error"></p>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://cqwiqchazpgqgilogmuw.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_zHOCpKGrMbvLSWCEnCOe6w_Oo3pp_lO';
+    // Supabase Auth needs an email, so the document maps to a fake one.
+    const EMAIL_DOMAIN = 'nclub.local';
+
+    const CATEGORY_LABELS = {
+      member_vip: 'Miembro VIP',
+      member_regular: 'Miembro regular',
+      guest: 'Invitado',
+      staff: 'Personal del club',
+      contractor: 'Trabajador externo',
+    };
+
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const $ = (id) => document.getElementById(id);
+
+    function showError(message) {
+      $('error').textContent = message || '';
+    }
+
+    const POSES = [
+      { pose: 'front', instruction: 'Mira de frente a la cámara' },
+      { pose: 'left', instruction: 'Gira la cabeza hacia la izquierda' },
+      { pose: 'right', instruction: 'Gira la cabeza hacia la derecha' },
+    ];
+    let userId = null;
+    let stream = null;
+    let nextPose = 0;
+
+    function renderSteps() {
+      [...$('steps').children].forEach((step, index) => {
+        step.classList.toggle('done', index < nextPose);
+        step.classList.toggle('active', index === nextPose);
+      });
+    }
+
+    function renderPhotoCount(count) {
+      $('photo-count').textContent = count;
+      $('photo-status').classList.toggle('ok', count === POSES.length);
+    }
+
+    function showProfile(person, photoCount) {
+      $('first-name').textContent = person.first_name;
+      $('last-name').textContent = person.last_name;
+      $('initials').textContent = `${person.first_name[0] ?? ''}${person.last_name[0] ?? ''}`.toUpperCase();
+      $('category').textContent = CATEGORY_LABELS[person.category] ?? person.category;
+      $('destination').textContent = person.destination ?? '-';
+      renderPhotoCount(photoCount);
+      $('login-form').hidden = true;
+      $('profile').hidden = false;
+    }
+
+    async function startCapture() {
+      nextPose = 0;
+      $('capture-instruction').textContent = POSES[0].instruction;
+      renderSteps();
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      } catch {
+        return showError('No se pudo acceder a la cámara.');
+      }
+      $('video').srcObject = stream;
+      $('capture').hidden = false;
+    }
+
+    function stopCapture() {
+      stream?.getTracks().forEach((track) => track.stop());
+      stream = null;
+      $('capture').hidden = true;
+    }
+
+    async function shoot() {
+      showError('');
+      const button = $('shoot');
+      button.disabled = true;
+      try {
+        const { pose } = POSES[nextPose];
+        const video = $('video');
+        const canvas = $('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+
+        // The backend turns these three photos into face_templates rows.
+        const { error: uploadError } = await db.storage
+          .from('faces')
+          .upload(`${userId}/${pose}.jpg`, blob, { contentType: 'image/jpeg', upsert: true });
+        if (uploadError) return showError('No se pudo subir la foto.');
+
+        $('oval').classList.add('flash');
+        setTimeout(() => $('oval').classList.remove('flash'), 500);
+
+        nextPose += 1;
+        renderPhotoCount(nextPose);
+        renderSteps();
+        if (nextPose === POSES.length) return stopCapture();
+        $('capture-instruction').textContent = POSES[nextPose].instruction;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    $('shoot').addEventListener('click', shoot);
+
+    $('login-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      showError('');
+
+      const { data, error } = await db.auth.signInWithPassword({
+        email: `${$('document').value.trim()}@${EMAIL_DOMAIN}`,
+        password: $('password').value,
+      });
+      if (error) return showError('Documento o contraseña incorrectos.');
+
+      const { data: person, error: personError } = await db
+        .from('persons')
+        .select('first_name, last_name, category, destination')
+        .eq('person_id', data.user.id)
+        .single();
+      if (personError) return showError('No se encontró el perfil.');
+
+      const { data: files, error: listError } = await db.storage.from('faces').list(data.user.id);
+      if (listError) return showError('No se pudo consultar las fotos.');
+      const poseFiles = POSES.map(({ pose }) => `${pose}.jpg`);
+      const count = files.filter((file) => poseFiles.includes(file.name)).length;
+
+      userId = data.user.id;
+      showProfile(person, count);
+      if (count < POSES.length) startCapture();
+    });
+
+    $('logout').addEventListener('click', async () => {
+      stopCapture();
+      await db.auth.signOut();
+      $('profile').hidden = true;
+      $('login-form').hidden = false;
+      $('login-form').reset();
+    });
+  </script>
+</body>
+</html>

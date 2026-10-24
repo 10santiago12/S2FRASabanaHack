@@ -59,7 +59,7 @@ Aún no funciona en el robot real:
 
 ## Video de presentación
 
-🔗 Enlace al video/demo: (pendiente — insertar URL aquí)
+🔗 Enlace al video/demo: https://youtu.be/WKdRD9Tq7c4
 
 ## Modelo de negocio (hipótesis por validar)
 

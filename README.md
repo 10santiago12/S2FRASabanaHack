@@ -1,7 +1,7 @@
-<h1 align="center">N Club</h1>
+<h1 align="center">PIBOT</h1>
 
 <p align="center">
-  A face-registration and visitor-category prototype that feeds the N Club reception robot.
+  A no-code framework for robot reception. This repository holds its face-registration and visitor-category piece, built for N Club.
 </p>
 
 <p align="center">
@@ -12,7 +12,7 @@
   <img alt="MediaPipe" src="https://img.shields.io/badge/MediaPipe-guided%20capture-0097A7" />
 </p>
 
-N Club is a private members club whose entrance relies on staff. Its facial recognition only tells members from non-members, but five kinds of visitors arrive and each needs different guidance. This repository covers the first link of the answer: a mobile-first web app where an admin registers people with their category, and each person registers three face photos that are **validated before anything is saved**. The robot layer reads that data to recognize the visitor and confirm which of the five categories applies.
+PIBOT lets a venue design, without code, how its robot welcomes people. Its first case is N Club, a private members club whose entrance relies on staff. Its facial recognition only tells members from non-members, but five kinds of visitors arrive and each needs different guidance. This repository covers the registration link of the answer: a mobile-first web app where an admin registers people with their category, and each person registers three face photos that are **validated before anything is saved**. The robot layer reads that data to recognize the visitor and confirm which of the five categories applies.
 
 > This is an academic hackathon prototype built for the Sabana Hack N Club challenge (see [`N Club.md`](N%20Club.md)). Face photos and embeddings are biometric data. The system does not verify that a real person is present and must not be used for access control.
 
@@ -48,7 +48,7 @@ This repo is one of four pieces. The three others were written by teammates.
 | --- | --- |
 | [`FaceRecognition_lite`](https://github.com/FerminEscalona/FaceRecognition_lite) | Face engine: detection, embeddings and matching. Packaged as the `.whl` used here. |
 | [`nclub-x2-simulation`](https://github.com/rafaelsava/nclub-x2-simulation) | Robot layer: MuJoCo simulation, voice, and the service that reads `persons` and `face_templates` to identify people. |
-| [`PIBOT`](https://github.com/santiagoguti17/PIBOT) | Visual editor of reception flows: what the robot does for each category. |
+| [`PIBOT`](https://github.com/santiagoguti17/PIBOT) | The visual no-code flow editor at the core of the framework: what the robot does for each category. |
 
 ## Technology
 

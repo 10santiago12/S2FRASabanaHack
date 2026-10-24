@@ -157,4 +157,4 @@ Set the Supabase URL and public key at the top of the script in `index.html`. Th
 
 [Santiago Gutiérrez](https://github.com/santiagoguti17), [Fermín Escalona](https://github.com/FerminEscalona), [Santiago Urrego](https://github.com/10santiago12), [Rafael Salcedo](https://github.com/rafaelsava) and [Adriana Galbán](https://github.com/ananabananag).
 
-See [`N Club.md`](N%20Club.md) for the challenge brief and evaluation criteria.
+See [`FICHA_TECNICA.md`](FICHA_TECNICA.md) for the Spanish project brief, scope and cost exercise, and [`N Club.md`](N%20Club.md) for the challenge brief and evaluation criteria.

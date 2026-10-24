@@ -1,20 +1,49 @@
-# Backend: face enrollment
+# Backend: face photo validation
 
-Reads the three photos of a person from the Supabase `faces` bucket, runs the
-`face_recognition_lite` model and stores the three embeddings in `face_templates`.
+`server.py` serves the web page and validates face photos before anything is saved:
+
+- `POST /check`: checks one photo (one face, big enough, sharp, well lit). Saves nothing.
+- `POST /enroll`: validates the three photos together with `face_recognition_lite`.
+  Only if they pass, it uploads them to the Supabase `faces` bucket and inserts the
+  three rows in `face_templates`. Otherwise it returns which poses to retake.
 
 Requires Python 3.11.
+
+## Setup (once)
 
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install ../face_recognition_lite-0.1.0-py3-none-any.whl supabase
-face-lite download-models          # needs internet, run once
-
-export SUPABASE_URL=https://<project>.supabase.co
-export SUPABASE_SERVICE_ROLE_KEY=<service role key>   # Windows: $env:NAME = "value"
-python backend/enroll.py <person_id>
+pip install ../face_recognition_lite-0.1.0-py3-none-any.whl supabase fastapi uvicorn python-multipart
+face-lite download-models          # needs internet
 ```
 
-Run it from the repository root so `artifacts/models` resolves. The service role
-key bypasses row level security: keep it out of the web page and out of Git.
+## Run the demo
+
+From the repository root:
+
+```powershell
+$env:SUPABASE_URL = "https://<project>.supabase.co"
+$env:SUPABASE_SERVICE_ROLE_KEY = "<secret key>"
+.\.venv\Scripts\python.exe backend\server.py
+```
+
+Open `http://localhost:8000` on the computer.
+
+### From a phone
+
+The phone camera needs HTTPS, so expose the server with a free tunnel (no account):
+
+```powershell
+winget install --id Cloudflare.cloudflared
+cloudflared tunnel --url http://localhost:8000
+```
+
+Open the `https://….trycloudflare.com` URL it prints. The URL changes on every run.
+
+The secret key bypasses row level security: keep it in the terminal only, never in
+the web page or in Git.
+
+## Manual enrollment
+
+`enroll.py <person_id>` still enrolls photos already stored in Supabase Storage.

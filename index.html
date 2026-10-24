@@ -5,16 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
   <title>N Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --ink: #111827;
-      --muted: #6b7280;
-      --line: #e8eaee;
-      --soft: #f6f7f9;
-      --ok: #16a34a;
-      --err: #dc2626;
-      --radius: 20px;
+      --porcelain: #ffffff;
+      --linen: #f6f4ef;
+      --ink: #16213b;
+      --slate: #5e6677;
+      --line: #e4e1da;
+      --brass: #a6884a;
+      --brass-soft: rgba(166, 136, 74, 0.45);
+      --bottle: #1f5c46;
+      --error: #b3261e;
+      --display: "Bodoni Moda", Didot, "Bodoni 72", Georgia, serif;
+      --text: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
@@ -26,176 +33,266 @@
       min-height: 100dvh;
       display: flex;
       justify-content: center;
-      padding: max(28px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
-      background: #fff;
+      align-items: center;
+      padding: max(40px, env(safe-area-inset-top)) 28px max(40px, env(safe-area-inset-bottom));
+      background: var(--porcelain);
       color: var(--ink);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-family: var(--text);
+      font-size: 16px;
+      line-height: 1.55;
       -webkit-font-smoothing: antialiased;
     }
 
-    main {
-      width: 100%;
-      max-width: 420px;
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
+    main { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 44px; }
+
+    /* Bodoni's hairlines vanish at large sizes on phones: a lower optical size keeps them sturdy. */
+    .brand, h1, .portrait, .emblem text, #capture-instruction {
+      font-family: var(--display);
+      font-optical-sizing: none;
+      font-variation-settings: "opsz" 18;
     }
 
     .brand {
+      padding-left: 0.2em; /* balances the trailing letter-spacing */
       text-align: center;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
     }
 
-    .screen { animation: rise 0.5s var(--ease) both; }
-    @keyframes rise {
-      from { opacity: 0; transform: translateY(14px); }
-      to { opacity: 1; transform: none; }
+    h1 { margin: 0 0 12px; font-size: 40px; font-weight: 500; line-height: 1.05; letter-spacing: -0.015em; }
+    .sub { margin: 0 0 44px; max-width: 34ch; color: var(--slate); font-size: 16px; }
+
+    /* The seal: two concentric rings that draw themselves once, like an engraved mark. */
+    .emblem { display: block; width: 96px; height: 96px; margin: 0 auto 36px; }
+    .emblem .ring {
+      fill: none;
+      stroke: var(--brass);
+      stroke-dasharray: 1;
+      transform: rotate(-90deg);
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: draw 1.8s var(--ease) both;
     }
+    .emblem .outer { stroke-width: 1.4; }
+    .emblem .inner { stroke-width: 0.6; animation-delay: 0.4s; }
+    .emblem text { fill: var(--ink); font-size: 40px; font-weight: 600; }
+    @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
-    h1 { margin: 0 0 6px; font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
-    .sub { margin: 0 0 28px; color: var(--muted); font-size: 15px; line-height: 1.5; }
-
-    /* Form */
-    .field { display: block; margin-bottom: 14px; }
-    .field span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
-    input {
+    /* Forms: the underline grows from the center when a field takes focus. */
+    .field { display: block; margin-bottom: 26px; }
+    .field span { display: block; font-size: 14px; font-weight: 500; color: var(--slate); }
+    input, select {
+      display: block;
       width: 100%;
-      height: 52px;
-      padding: 0 16px;
-      border: 1.5px solid var(--line);
-      border-radius: 14px;
-      background: var(--soft);
+      height: 50px;
+      padding: 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: linear-gradient(var(--ink), var(--ink)) no-repeat center bottom / 0 1.5px;
       color: var(--ink);
       font: inherit;
-      font-size: 16px; /* avoids iOS zoom on focus */
-      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      font-size: 17px; /* 16px or more avoids iOS zoom on focus */
+      transition: background-size 0.4s var(--ease);
     }
-    input:focus {
-      outline: none;
-      border-color: var(--ink);
-      background: #fff;
-      box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.06);
+    input::placeholder { color: #a4a9b4; }
+    input:focus, select:focus { outline: none; background-size: 100% 1.5px; }
+    select {
+      appearance: none;
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%235e6677' stroke-width='1.5'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 2px center,
+        linear-gradient(var(--ink), var(--ink)) no-repeat center bottom / 0 1.5px;
     }
+    select:focus { background-size: auto, 100% 1.5px; }
 
-    /* Buttons */
+    /* Buttons: ink with a fine brass line inset, like a stamped card. */
     .btn {
+      display: block;
       width: 100%;
-      height: 54px;
+      height: 56px;
+      margin-top: 16px;
       border: 0;
-      border-radius: 999px;
+      border-radius: 4px;
       background: var(--ink);
-      color: #fff;
+      box-shadow: inset 0 0 0 3px var(--ink), inset 0 0 0 4px var(--brass-soft);
+      color: var(--porcelain);
       font: inherit;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 500;
+      letter-spacing: 0.04em;
       cursor: pointer;
-      transition: transform 0.15s var(--ease), opacity 0.2s, box-shadow 0.2s;
-      box-shadow: 0 8px 20px rgba(17, 24, 39, 0.18);
+      transition: transform 0.2s var(--ease), box-shadow 0.3s, opacity 0.2s;
     }
-    .btn:active { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.45; box-shadow: none; cursor: default; }
-    .btn.ghost { background: transparent; color: var(--muted); box-shadow: none; font-weight: 500; }
+    .btn:hover { box-shadow: inset 0 0 0 3px var(--ink), inset 0 0 0 4px var(--brass); }
+    .btn:active { transform: scale(0.985); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .link {
+      display: block;
+      margin: 24px auto 0;
+      padding: 8px 12px;
+      border: 0;
+      background: none;
+      color: var(--slate);
+      font: inherit;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-color: var(--line);
+      text-underline-offset: 6px;
+      transition: text-decoration-color 0.2s;
+    }
+    .link:hover { text-decoration-color: var(--brass); }
+    .btn:focus-visible, .link:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
 
-    /* Profile */
-    .card {
-      padding: 24px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
-    }
-    .who { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-    .avatar {
-      width: 56px; height: 56px; flex: none;
-      display: grid; place-items: center;
+    /* Profile: the portrait repeats the seal's double ring. */
+    #profile, #admin { text-align: center; }
+    .portrait {
+      display: grid;
+      place-items: center;
+      width: 124px;
+      height: 124px;
+      margin: 0 auto 32px;
       border-radius: 50%;
-      background: var(--ink); color: #fff;
-      font-size: 20px; font-weight: 600;
+      background: var(--linen);
+      box-shadow:
+        0 0 0 5px var(--porcelain), 0 0 0 6.4px var(--brass),
+        0 0 0 10px var(--porcelain), 0 0 0 10.6px var(--brass-soft);
+      font-size: 42px;
+      font-weight: 600;
     }
-    .name { font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
-    .chip {
-      display: inline-block; margin-top: 6px; padding: 4px 12px;
-      border-radius: 999px; background: var(--soft);
-      font-size: 13px; font-weight: 500;
+    .name { margin: 0 0 8px; font-size: 34px; }
+    .role { margin: 0 0 36px; color: var(--slate); font-size: 17px; }
+    .facts { margin: 0; padding: 0; text-align: left; }
+    .facts div {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 18px 0;
+      border-top: 1px solid var(--line);
     }
-    .row {
-      display: flex; justify-content: space-between; gap: 16px;
-      padding: 14px 0; border-top: 1px solid var(--line); font-size: 15px;
-    }
-    .row span:first-child { color: var(--muted); }
-    .row span:last-child { font-weight: 500; text-align: right; }
-    .ok { color: var(--ok); }
+    .facts div:last-child { border-bottom: 1px solid var(--line); }
+    .facts dt { color: var(--slate); }
+    .facts dd { margin: 0; font-weight: 500; text-align: right; }
+    #photo-status.ok { color: var(--bottle); }
 
-    /* Capture */
-    #capture { margin-top: 24px; text-align: center; }
-    .steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
-    .step {
-      width: 8px; height: 8px; border-radius: 999px; background: var(--line);
-      transition: width 0.4s var(--ease), background 0.3s;
+    #admin form { text-align: left; }
+    #admin h1, #admin .sub { text-align: left; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    /* While the camera is open, the profile shrinks so the camera fits on a phone screen. */
+    #profile.capturing .portrait {
+      width: 68px;
+      height: 68px;
+      margin-bottom: 20px;
+      font-size: 24px;
+      box-shadow:
+        0 0 0 3px var(--porcelain), 0 0 0 4.2px var(--brass),
+        0 0 0 6.5px var(--porcelain), 0 0 0 7px var(--brass-soft);
     }
-    .step.active { width: 28px; background: var(--ink); }
-    .step.done { background: var(--ok); }
+    #profile.capturing .name { font-size: 26px; }
+    #profile.capturing .role { margin-bottom: 0; font-size: 15px; }
+    #profile.capturing .facts { display: none; }
+
+    /* Capture: the three small ovals are the sequence of photos. */
+    #capture { margin-top: 36px; }
+    .steps { display: flex; justify-content: center; gap: 14px; margin-bottom: 28px; }
+    .step {
+      width: 13px;
+      height: 18px;
+      border: 1.25px solid var(--brass);
+      border-radius: 50%;
+      transition: background 0.3s, border-color 0.3s, transform 0.3s var(--ease);
+    }
+    .step.active { border-color: var(--ink); transform: scale(1.3); }
+    .step.done { background: var(--bottle); border-color: var(--bottle); }
 
     .oval {
       position: relative;
-      width: min(68vw, 270px);
+      width: min(64vw, 250px);
       aspect-ratio: 3 / 4;
-      margin: 0 auto 22px;
+      margin: 0 auto 30px;
       border-radius: 50%;
       overflow: hidden;
-      background: var(--soft);
-      box-shadow: 0 0 0 5px #fff, 0 0 0 7px var(--ink), 0 18px 40px rgba(17, 24, 39, 0.12);
-      transition: box-shadow 0.3s var(--ease);
+      background: var(--linen);
+      box-shadow: 0 0 0 6px var(--porcelain), 0 0 0 7.4px var(--brass);
+      transition: box-shadow 0.35s var(--ease);
     }
-    .oval.flash { box-shadow: 0 0 0 5px #fff, 0 0 0 7px var(--ok), 0 0 0 16px rgba(22, 163, 74, 0.15); }
     .oval video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .oval.holding { box-shadow: 0 0 0 6px var(--porcelain), 0 0 0 8px var(--bottle); }
+    .oval.flash { box-shadow: 0 0 0 6px var(--porcelain), 0 0 0 8px var(--bottle), 0 0 0 20px rgba(31, 92, 70, 0.12); }
 
-    #capture-instruction { margin: 0 0 4px; font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
-    .hint { margin: 0 0 22px; color: var(--muted); font-size: 14px; }
+    #capture-instruction { margin: 0 0 8px; font-size: 25px; font-weight: 500; line-height: 1.2; }
+    .hint { margin: 0 0 28px; min-height: 24px; color: var(--slate); font-size: 15px; }
 
-    #error { min-height: 20px; margin: 0; text-align: center; color: var(--err); font-size: 14px; }
+    #error, #notice { margin: 0; text-align: center; font-size: 15px; }
+    #error { min-height: 22px; color: var(--error); }
+    #notice { color: var(--bottle); }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 <body>
   <main>
-    <div class="brand">N Club</div>
+    <header class="brand">N Club</header>
 
-    <form id="login-form" class="screen">
-      <h1>Bienvenido</h1>
-      <p class="sub">Ingresa con tu documento para continuar.</p>
-      <label class="field"><span>Documento</span><input id="document" inputmode="numeric" autocomplete="username" required></label>
+    <form id="login-form">
+      <svg class="emblem" viewBox="0 0 96 96" aria-hidden="true">
+        <circle class="ring outer" cx="48" cy="48" r="46" pathLength="1" />
+        <circle class="ring inner" cx="48" cy="48" r="41" pathLength="1" />
+        <text x="48" y="62" text-anchor="middle">N</text>
+      </svg>
+      <h1 id="login-title">Bienvenido</h1>
+      <p class="sub" id="login-sub">Ingresa con tu documento para continuar.</p>
+      <label class="field"><span id="document-label">Documento</span><input id="document" inputmode="numeric" autocomplete="username" required></label>
       <label class="field"><span>Contraseña</span><input id="password" type="password" autocomplete="current-password" required></label>
-      <button class="btn" type="submit" style="margin-top: 10px">Ingresar</button>
+      <button class="btn" type="submit">Ingresar</button>
+      <button class="link" id="admin-toggle" type="button">Admin</button>
     </form>
 
-    <section id="profile" class="screen" hidden>
-      <div class="card">
-        <div class="who">
-          <div class="avatar" id="initials"></div>
-          <div>
-            <div class="name"><span id="first-name"></span> <span id="last-name"></span></div>
-            <span class="chip" id="category"></span>
-          </div>
+    <section id="admin" hidden>
+      <h1>Registrar usuario</h1>
+      <p class="sub">Crea la cuenta y el perfil en un solo paso.</p>
+      <form id="admin-form">
+        <div class="two">
+          <label class="field"><span>Nombre</span><input id="new-first-name" autocomplete="off" required></label>
+          <label class="field"><span>Apellido</span><input id="new-last-name" autocomplete="off" required></label>
         </div>
-        <div class="row"><span>Destino</span><span id="destination"></span></div>
-        <div class="row"><span>Fotos registradas</span><span id="photo-status"><span id="photo-count"></span> de 3</span></div>
-      </div>
+        <label class="field"><span>Documento</span><input id="new-document" inputmode="numeric" autocomplete="off" required></label>
+        <label class="field"><span>Contraseña</span><input id="new-password" type="password" autocomplete="new-password" minlength="6" required></label>
+        <label class="field"><span>Rol</span><select id="new-category" required></select></label>
+        <label class="field"><span>Lugar</span><input id="new-destination" placeholder="Salón VIP" autocomplete="off"></label>
+        <button class="btn" id="create-user" type="submit">Registrar</button>
+      </form>
+      <button class="link" id="admin-logout" type="button">Salir</button>
+    </section>
+
+    <section id="profile" hidden>
+      <div class="portrait" id="initials"></div>
+      <h1 class="name"><span id="first-name"></span> <span id="last-name"></span></h1>
+      <p class="role" id="category"></p>
+      <dl class="facts">
+        <div><dt>Destino</dt><dd id="destination"></dd></div>
+        <div><dt>Fotos registradas</dt><dd id="photo-status"><span id="photo-count"></span> de 3</dd></div>
+      </dl>
 
       <div id="capture" hidden>
         <div class="steps" id="steps"><i class="step"></i><i class="step"></i><i class="step"></i></div>
         <div class="oval" id="oval">
-          <video id="video" autoplay playsinline muted></video>        </div>
+          <video id="video" autoplay playsinline muted></video>
+        </div>
         <canvas id="canvas" hidden></canvas>
         <p id="capture-instruction"></p>
-        <p class="hint">Centra tu rostro dentro del óvalo.</p>
+        <p class="hint" id="capture-hint">Centra tu rostro dentro del óvalo.</p>
         <button class="btn" id="shoot" type="button">Tomar foto</button>
       </div>
 
-      <button class="btn ghost" id="logout" type="button" style="margin-top: 16px">Salir</button>
+      <button class="link" id="logout" type="button">Salir</button>
     </section>
 
+    <p id="notice"></p>
     <p id="error"></p>
   </main>
 
@@ -221,17 +318,129 @@
     }
 
     const POSES = [
-      { pose: 'front', instruction: 'Mira de frente a la cámara' },
-      { pose: 'left', instruction: 'Gira la cabeza hacia la izquierda' },
-      { pose: 'right', instruction: 'Gira la cabeza hacia la derecha' },
+      { pose: 'front', instruction: 'Mira de frente' },
+      { pose: 'left', instruction: 'Gira a tu izquierda' },
+      { pose: 'right', instruction: 'Gira a tu derecha' },
     ];
     let userId = null;
     let stream = null;
     let nextPose = 0;
 
+    // Auto-capture: a small face detector (loaded only when the camera opens) checks
+    // framing and head turn; the photo is taken once the pose holds for HOLD_MS.
+    const MP_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1';
+    const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
+    const HOLD_MS = 600;
+    const CHECK_EVERY_MS = 100; // ~10 checks per second keeps the phone cool
+    const COOLDOWN_MS = 800;
+    // Thresholds are provisional: tune them on real phones.
+    const FACE_SIZE = { min: 0.26, max: 0.5 }; // face width / video width
+    const TURN = { front: 0.12, side: 0.3, max: 0.8 }; // nose offset / eye distance
+    const LEFT_SIGN = 1; // flip to -1 if "left" and "right" come out swapped
+
+    let detector = null;
+    let loopId = null;
+    let holdSince = null;
+    let lastCheck = 0;
+    let capturing = false;
+
+    async function loadDetector() {
+      if (detector) return;
+      const { FaceDetector, FilesetResolver } = await import(`${MP_BASE}/vision_bundle.mjs`);
+      const vision = await FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);
+      detector = await FaceDetector.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: MODEL_URL },
+        runningMode: 'VIDEO',
+      });
+    }
+
+    function judge(detections, pose) {
+      if (detections.length === 0) return { message: 'No veo tu rostro' };
+      if (detections.length > 1) return { message: 'Debe aparecer solo una persona' };
+
+      const { boundingBox: box, keypoints } = detections[0];
+      const { videoWidth, videoHeight } = $('video');
+      const size = box.width / videoWidth;
+      if (size < FACE_SIZE.min) return { message: 'Acércate un poco' };
+      if (size > FACE_SIZE.max) return { message: 'Aléjate un poco' };
+
+      const cx = (box.originX + box.width / 2) / videoWidth;
+      const cy = (box.originY + box.height / 2) / videoHeight;
+      if (Math.abs(cx - 0.5) > 0.15 || Math.abs(cy - 0.5) > 0.18) {
+        return { message: 'Centra tu rostro en el óvalo' };
+      }
+
+      // Keypoints 0 and 1 are the eyes, 2 is the nose tip. Turn is the nose offset from
+      // the eye midpoint in eye-distance units; positive = toward the person's left.
+      const [eyeA, eyeB, nose] = keypoints;
+      const turn = (nose.x - (eyeA.x + eyeB.x) / 2) / Math.abs(eyeA.x - eyeB.x);
+
+      if (pose === 'front') {
+        if (Math.abs(turn) > TURN.front) return { message: 'Mira de frente a la cámara' };
+      } else {
+        const amount = turn * LEFT_SIGN * (pose === 'left' ? 1 : -1);
+        if (amount < TURN.side) {
+          return { message: `Gira un poco más a tu ${pose === 'left' ? 'izquierda' : 'derecha'}` };
+        }
+        if (amount > TURN.max) return { message: 'Gira un poco menos' };
+      }
+      return { ok: true, message: 'Perfecto, no te muevas' };
+    }
+
+    function trackFace(now) {
+      loopId = requestAnimationFrame(trackFace);
+      const video = $('video');
+      if (capturing || now - lastCheck < CHECK_EVERY_MS || video.readyState < 2) return;
+      lastCheck = now;
+
+      const verdict = judge(detector.detectForVideo(video, now).detections, POSES[nextPose].pose);
+      $('capture-hint').textContent = verdict.message;
+      $('oval').classList.toggle('holding', Boolean(verdict.ok));
+      if (!verdict.ok) {
+        holdSince = null;
+        return;
+      }
+      holdSince ??= now;
+      if (now - holdSince >= HOLD_MS) {
+        holdSince = null;
+        shoot();
+      }
+    }
+
+    // Photos accepted by /check, kept in memory until /enroll validates the three together.
+    const photos = {};
+    const firstMissing = () => POSES.findIndex(({ pose }) => !photos[pose]);
+
+    const PHOTO_PROBLEMS = {
+      no_face: 'No se detectó tu rostro. Mira a la cámara con buena luz.',
+      multiple_faces: 'Debe aparecer solo una persona.',
+      face_too_small: 'Acércate un poco a la cámara.',
+      blur: 'La foto salió borrosa. Quédate quieto.',
+      lighting: 'La luz no es adecuada. Busca un lugar iluminado.',
+      invalid_image: 'No se pudo leer la foto. Repítela.',
+    };
+    const ENROLL_PROBLEMS = {
+      inconsistent_enrollment: 'Las fotos no se parecen lo suficiente entre sí, o son casi iguales. Repítelas.',
+      recapture_required: 'Algunas fotos no sirvieron. Repite las indicadas.',
+    };
+
+    // The page is served by backend/server.py, so these paths are same-origin.
+    async function callBackend(path, files) {
+      const { data: { session } } = await db.auth.getSession();
+      const form = new FormData();
+      for (const [name, blob] of Object.entries(files)) form.append(name, blob, `${name}.jpg`);
+      const response = await fetch(path, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: form,
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
+
     function renderSteps() {
       [...$('steps').children].forEach((step, index) => {
-        step.classList.toggle('done', index < nextPose);
+        step.classList.toggle('done', Boolean(photos[POSES[index].pose]));
         step.classList.toggle('active', index === nextPose);
       });
     }
@@ -253,8 +462,10 @@
     }
 
     async function startCapture() {
+      for (const pose of Object.keys(photos)) delete photos[pose];
       nextPose = 0;
       $('capture-instruction').textContent = POSES[0].instruction;
+      renderPhotoCount(0);
       renderSteps();
       try {
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
@@ -263,18 +474,59 @@
       }
       $('video').srcObject = stream;
       $('capture').hidden = false;
+      $('profile').classList.add('capturing');
+
+      // The manual button is only the fallback when the detector cannot load.
+      $('shoot').hidden = true;
+      $('capture-hint').textContent = 'Preparando la cámara…';
+      try {
+        await loadDetector();
+      } catch {
+        $('shoot').hidden = false;
+        $('capture-hint').textContent = 'Centra tu rostro y toma la foto.';
+        return;
+      }
+      if (!stream) return; // the user logged out while the detector was loading
+      loopId = requestAnimationFrame(trackFace);
     }
 
     function stopCapture() {
+      cancelAnimationFrame(loopId);
+      loopId = null;
+      holdSince = null;
+      $('oval').classList.remove('holding');
       stream?.getTracks().forEach((track) => track.stop());
       stream = null;
       $('capture').hidden = true;
+      $('profile').classList.remove('capturing');
+    }
+
+    // With the three photos accepted, the server validates them together and saves them.
+    async function submitPhotos() {
+      $('capture-hint').textContent = 'Guardando tus fotos…';
+      const result = await callBackend('/enroll', photos);
+      if (result.status === 'enrolled') {
+        renderPhotoCount(POSES.length);
+        return stopCapture();
+      }
+
+      // Keep the accepted photos; ask again only for the rejected poses.
+      const rejected = result.captures.filter((capture) => capture.status !== 'ok');
+      for (const capture of rejected) delete photos[capture.position];
+      if (rejected.length === 0) for (const pose of Object.keys(photos)) delete photos[pose];
+      renderPhotoCount(Object.keys(photos).length);
+
+      nextPose = firstMissing();
+      renderSteps();
+      $('capture-instruction').textContent = POSES[nextPose].instruction;
+      showError(ENROLL_PROBLEMS[result.status] ?? 'No se pudieron guardar las fotos. Intenta de nuevo.');
     }
 
     async function shoot() {
       showError('');
       const button = $('shoot');
       button.disabled = true;
+      capturing = true;
       try {
         const { pose } = POSES[nextPose];
         const video = $('video');
@@ -284,22 +536,30 @@
         canvas.getContext('2d').drawImage(video, 0, 0);
         const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9));
 
-        // The backend turns these three photos into face_templates rows.
-        const { error: uploadError } = await db.storage
-          .from('faces')
-          .upload(`${userId}/${pose}.jpg`, blob, { contentType: 'image/jpeg', upsert: true });
-        if (uploadError) return showError('No se pudo subir la foto.');
+        // Nothing is saved yet: the server only checks this photo.
+        $('oval').classList.remove('holding');
+        $('capture-hint').textContent = 'Revisando la foto…';
+        const verdict = await callBackend('/check', { image: blob });
+        if (verdict.status !== 'ok') {
+          return showError(PHOTO_PROBLEMS[verdict.reason] ?? PHOTO_PROBLEMS[verdict.status]
+            ?? 'No se pudo usar la foto. Repítela.');
+        }
 
+        photos[pose] = blob;
         $('oval').classList.add('flash');
         setTimeout(() => $('oval').classList.remove('flash'), 500);
+        renderPhotoCount(Object.keys(photos).length);
 
-        nextPose += 1;
-        renderPhotoCount(nextPose);
+        nextPose = firstMissing();
         renderSteps();
-        if (nextPose === POSES.length) return stopCapture();
+        if (nextPose === -1) return await submitPhotos();
         $('capture-instruction').textContent = POSES[nextPose].instruction;
+      } catch {
+        showError('No se pudo conectar con el servidor.');
       } finally {
         button.disabled = false;
+        capturing = false;
+        lastCheck = performance.now() + COOLDOWN_MS; // pause checks right after a photo
       }
     }
 
@@ -314,6 +574,21 @@
         password: $('password').value,
       });
       if (error) return showError('Documento o contraseña incorrectos.');
+
+      if (adminMode) {
+        const { data: adminRow } = await db
+          .from('admins')
+          .select('user_id')
+          .eq('user_id', data.user.id)
+          .maybeSingle();
+        if (!adminRow) {
+          await db.auth.signOut();
+          return showError('Esta cuenta no es de administrador.');
+        }
+        $('login-form').hidden = true;
+        $('admin').hidden = false;
+        return;
+      }
 
       const { data: person, error: personError } = await db
         .from('persons')
@@ -338,6 +613,68 @@
       $('profile').hidden = true;
       $('login-form').hidden = false;
       $('login-form').reset();
+    });
+
+    // Admin: log in from the login screen, then register users through the Edge Function.
+    let adminMode = false;
+
+    function showNotice(message) {
+      $('notice').textContent = message || '';
+    }
+
+    function setAdminMode(on) {
+      adminMode = on;
+      $('login-title').textContent = on ? 'Administrador' : 'Bienvenido';
+      $('login-sub').textContent = on
+        ? 'Ingresa con tu cuenta de administrador.'
+        : 'Ingresa con tu documento para continuar.';
+      $('admin-toggle').textContent = on ? 'Volver' : 'Admin';
+      $('document-label').textContent = on ? 'Usuario' : 'Documento';
+      $('document').inputMode = on ? 'text' : 'numeric';
+      showError('');
+    }
+
+    $('new-category').innerHTML = Object.entries(CATEGORY_LABELS)
+      .map(([value, label]) => `<option value="${value}">${label}</option>`)
+      .join('');
+
+    $('admin-toggle').addEventListener('click', () => setAdminMode(!adminMode));
+
+    $('admin-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      showError('');
+      showNotice('');
+      const button = $('create-user');
+      button.disabled = true;
+      try {
+        const { error } = await db.functions.invoke('create-user', {
+          body: {
+            first_name: $('new-first-name').value,
+            last_name: $('new-last-name').value,
+            document: $('new-document').value,
+            password: $('new-password').value,
+            category: $('new-category').value,
+            destination: $('new-destination').value,
+          },
+        });
+        if (error) {
+          const detail = await error.context?.json?.().catch(() => null);
+          return showError(detail?.error ?? 'No se pudo registrar el usuario.');
+        }
+        showNotice('Usuario registrado.');
+        $('admin-form').reset();
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $('admin-logout').addEventListener('click', async () => {
+      await db.auth.signOut();
+      $('admin').hidden = true;
+      $('login-form').hidden = false;
+      $('login-form').reset();
+      showNotice('');
+      setAdminMode(false);
     });
   </script>
 </body>
